@@ -26,15 +26,53 @@ public class ScreenEngine extends JFrame implements Runnable {
         {
             for (int j = 0; j < SIZE/20; j ++)
             {
-                arr[i][j] = new SquareSpace(0);
+
+                if (Math.random() < .2) arr[i][j] = new SquareSpace(-1);
+                else {
+                    arr[i][j] = new SquareSpace(0);
+
+                }
             }
         }
+        for (int i = 0; i < SIZE/20; i++)
+        {
+            for (int j = 0; j < SIZE/20; j ++)
+            {
+                checkState(i,j);
+            }
+        }
+
 
 
         setBackground(Color.BLACK);
         setSize(SIZE+ 2*dX, SIZE+ 2*dY);
         setTitle("MasterSweep");
+        setResizable(false);
         setVisible(true);
+    }
+
+    public void checkState(int x, int y)
+    {
+        int count = 0;
+        if (arr[x][y].getState() == -1) return;
+        if ( x-1 > 0 && x-1 < 20)
+        {
+            if ( y-1 > 0 && y-1 < 20 && arr[x-1][y-1].getState() == -1) count++;
+            if ( y > 0 && y < 20 && arr[x-1][y].getState() == -1) count++;
+            if ( y+1 > 0 && y+1 < 20 && arr[x-1][y+1].getState() == -1) count++;
+        }
+        if ( x > 0 && x < 20){
+            if ( y-1 > 0 && y-1 < 20 && arr[x][y-1].getState() == -1) count++;
+            // dont check itself
+            if ( y+1 > 0 && y+1 < 20 && arr[x][y+1].getState() == -1) count++;
+        }
+        if ( x+1 > 0 && x+1 < 20){
+            if ( y-1 > 0 && y-1 < 20 && arr[x+1][y-1].getState() == -1) count++;
+            if ( y > 0 && y < 20 && arr[x+1][y].getState() == -1) count++;
+            if ( y+1 > 0 && y+1 < 20 && arr[x+1][y+1].getState() == -1) count++;
+        }
+        arr[x][y].setState(count);
+
     }
 
 
@@ -62,11 +100,13 @@ public class ScreenEngine extends JFrame implements Runnable {
         System.out.print("Test");
 
 
-        addMouseListener(new MouseAdapter() {
+        MouseAdapter m = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].reveal();
                 repaint();
+
             }
 
             @Override
@@ -99,20 +139,29 @@ public class ScreenEngine extends JFrame implements Runnable {
                 super.mouseDragged(e);
             }
 
+
+            //int mouseX = -1,mouseY = -1;
             @Override
             public void mouseMoved(MouseEvent e) {
                 super.mouseMoved(e);
+
+
+                /**if (e.getX() > SIZE + dX || e.getY() > SIZE + dY || e.getX() < dX || e.getY() < dY){
+                    if (mouseX != -1)
+                    {
+                        arr[((mouseX - dX) / 20)][((mouseY-dY) / 20)].mouseOver = false;
+                    }
+
+
+                    mouseX = e.getX();
+                    mouseY = e.getY();
+
+                    arr[(mouseX - dX) / 20][(mouseY-dY) / 20].mouseOver = true;
+                    repaint();
+                }**/
             }
-        });
-        /**
-        while(true)
-        {
-            repaint();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } //*/
+        };
+        addMouseListener(m);
+        addMouseMotionListener(m);
     }
 }

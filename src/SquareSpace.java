@@ -12,6 +12,8 @@ public class SquareSpace {
     int state; // number of bombs next to, -1 if bomb
     boolean revealed;
     boolean flagged;
+    public boolean mouseOver;
+    static Image[] imgs;
 
     public void reveal()
     {
@@ -20,6 +22,10 @@ public class SquareSpace {
 
     public void flag(){
         flagged = true;
+    }
+    public void mouse()
+    {
+        mouseOver = !mouseOver;
     }
 
     public int getState() {
@@ -32,14 +38,46 @@ public class SquareSpace {
 
 
 
+    static{
+        imgs = new Image[13];
+        File f;
+        for (int i = -1; i < 9;i++)
+        {
+            f = new File("res/"+i+".png");
+
+            imgs[i+1] = null;
+            try {
+                imgs[i+1] = ImageIO.read(f);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try{
+            f = new File("res/A.png");
+            imgs[10] = ImageIO.read(f);
+            f = new File("res/B.png");
+            imgs[11] = ImageIO.read(f);
+            f = new File("res/F.png");
+            imgs[12] = ImageIO.read(f);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     SquareSpace(int state)
     {
         this.state = state;
         revealed = false;
         flagged = false;
+        mouseOver = false;
+
+
     }
     SquareSpace(){
         state = 0;
+        revealed = false;
+        flagged = false;
+        mouseOver = false;
     }
 
 
@@ -66,18 +104,11 @@ public class SquareSpace {
 
     public Image toIcon()
     {
-        File f;
-        if (!revealed) f = new File("res/A.png");
-        else if (flagged) f = new File("res/F.png");
-        else f = new File("res/"+state+".png");
-
-        Image i = null;
-        try {
-            i = ImageIO.read(f);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (flagged) return imgs[12];
+        else if (!revealed) {
+            if (mouseOver) return imgs[11];
+            else return imgs[10];
         }
-
-        return i;
+        else return imgs[state+1];
     }
 }
