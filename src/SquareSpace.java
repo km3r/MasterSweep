@@ -17,11 +17,11 @@ public class SquareSpace {
 
     public void reveal()
     {
-        revealed = true;
+        if (!flagged) revealed = true;
     }
 
     public void flag(){
-        flagged = true;
+        if (!revealed) flagged = !flagged;
     }
     public void mouse()
     {
@@ -36,7 +36,9 @@ public class SquareSpace {
         if (state < 9 && state > - 2) this.state = state;
     }
 
-
+    public boolean isRevealed() {
+        return revealed;
+    }
 
     static{
         imgs = new Image[13];

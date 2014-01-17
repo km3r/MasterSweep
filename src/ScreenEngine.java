@@ -20,14 +20,21 @@ public class ScreenEngine extends JFrame implements Runnable {
     final int SIZE = 400; // keep multiple of 20
     ScreenEngine()
     {
-
+        reset();
+        setBackground(Color.BLACK);
+        setSize(SIZE+ 2*dX, SIZE+ 2*dY);
+        setTitle("MasterSweep");
+        setResizable(false);
+        setVisible(true);
+    }
+    public void reset(){
         arr = new SquareSpace[SIZE/20][SIZE/20];
         for (int i = 0; i < SIZE/20; i++)
         {
             for (int j = 0; j < SIZE/20; j ++)
             {
 
-                if (Math.random() < .2) arr[i][j] = new SquareSpace(-1);
+                if (Math.random() < .12) arr[i][j] = new SquareSpace(-1);
                 else {
                     arr[i][j] = new SquareSpace(0);
 
@@ -44,32 +51,28 @@ public class ScreenEngine extends JFrame implements Runnable {
 
 
 
-        setBackground(Color.BLACK);
-        setSize(SIZE+ 2*dX, SIZE+ 2*dY);
-        setTitle("MasterSweep");
-        setResizable(false);
-        setVisible(true);
+
     }
 
     public void checkState(int x, int y)
     {
         int count = 0;
         if (arr[x][y].getState() == -1) return;
-        if ( x-1 > 0 && x-1 < 20)
+        if ( x-1 >= 0 && x-1 < 20)
         {
-            if ( y-1 > 0 && y-1 < 20 && arr[x-1][y-1].getState() == -1) count++;
-            if ( y > 0 && y < 20 && arr[x-1][y].getState() == -1) count++;
-            if ( y+1 > 0 && y+1 < 20 && arr[x-1][y+1].getState() == -1) count++;
+            if ( y-1 >= 0 && y-1 < 20 && arr[x-1][y-1].getState() == -1) count++;
+            if ( y >= 0 && y < 20 && arr[x-1][y].getState() == -1) count++;
+            if ( y+1 >= 0 && y+1 < 20 && arr[x-1][y+1].getState() == -1) count++;
         }
-        if ( x > 0 && x < 20){
-            if ( y-1 > 0 && y-1 < 20 && arr[x][y-1].getState() == -1) count++;
+        if ( x >= 0 && x < 20){
+            if ( y-1 >= 0 && y-1 < 20 && arr[x][y-1].getState() == -1) count++;
             // dont check itself
-            if ( y+1 > 0 && y+1 < 20 && arr[x][y+1].getState() == -1) count++;
+            if ( y+1 >= 0 && y+1 < 20 && arr[x][y+1].getState() == -1) count++;
         }
-        if ( x+1 > 0 && x+1 < 20){
-            if ( y-1 > 0 && y-1 < 20 && arr[x+1][y-1].getState() == -1) count++;
-            if ( y > 0 && y < 20 && arr[x+1][y].getState() == -1) count++;
-            if ( y+1 > 0 && y+1 < 20 && arr[x+1][y+1].getState() == -1) count++;
+        if ( x+1 >= 0 && x+1 < 20){
+            if ( y-1 >= 0 && y-1 < 20 && arr[x+1][y-1].getState() == -1) count++;
+            if ( y >= 0 && y < 20 && arr[x+1][y].getState() == -1) count++;
+            if ( y+1 >= 0 && y+1 < 20 && arr[x+1][y+1].getState() == -1) count++;
         }
         arr[x][y].setState(count);
 
@@ -104,7 +107,8 @@ public class ScreenEngine extends JFrame implements Runnable {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].reveal();
+                if ( e.getButton() == MouseEvent.BUTTON1) reveal((e.getX() - dX) / 20, (e.getY() - dY) / 20);
+                else if (e.getButton() == MouseEvent.BUTTON3) arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].flag();
                 repaint();
 
             }
@@ -163,5 +167,37 @@ public class ScreenEngine extends JFrame implements Runnable {
         };
         addMouseListener(m);
         addMouseMotionListener(m);
+      
+    }
+
+
+
+
+    public void reveal(int x, int y){
+        arr[x][y].reveal();
+        if (arr[x][y].getState() == -1){
+            System.out.println("LOSE");
+            reset();
+            repaint();
+            return;
+        }
+        if (arr[x][y].getState() != 0) return;
+
+
+
+        for (int i = -1; i < 2; i++)
+        {
+            for (int j = -1; j < 2; j++)
+            {
+                if (x + i < 20
+                        && x + i >= 0
+                        && y + j < 20
+                        && y + j >= 0
+                        && !arr[x+i][y+j].isRevealed()){
+                    arr[x+i][y+j].reveal();
+                    if (arr[x+i][y+j].getState() == 0) reveal( x + i,y + j);
+                }
+            }
+        }
     }
 }
