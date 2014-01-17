@@ -137,7 +137,7 @@ public class ScreenEngine extends JFrame implements Runnable {
                 else if (e.getButton() == MouseEvent.BUTTON3){
                     arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].flag();
                     if (arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].flagged) bCount--;
-                    else bCount++;
+                    else if (!arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].isRevealed())bCount++;
                 }
 
                 repaint();
