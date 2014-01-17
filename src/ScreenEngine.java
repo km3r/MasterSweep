@@ -15,11 +15,14 @@ public class ScreenEngine extends JFrame implements Runnable {
     Graphics g2;
     SquareSpace[][] arr;
 
+    int bCount;
     final int dX = 20;
     final int dY = 40;
-    final int SIZE = 400; // keep multiple of 20
+    final static int SIZE = 400; // keep multiple of 20
+
     ScreenEngine()
     {
+
         reset();
         setBackground(Color.BLACK);
         setSize(SIZE+ 2*dX, SIZE+ 2*dY);
@@ -28,13 +31,19 @@ public class ScreenEngine extends JFrame implements Runnable {
         setVisible(true);
     }
     public void reset(){
+        SquareSpace.bStart = 0;
+        SquareSpace.totalCount = 400;
+        bCount = 0;
         arr = new SquareSpace[SIZE/20][SIZE/20];
         for (int i = 0; i < SIZE/20; i++)
         {
             for (int j = 0; j < SIZE/20; j ++)
             {
 
-                if (Math.random() < .12) arr[i][j] = new SquareSpace(-1);
+                if (Math.random() < .12){
+                    arr[i][j] = new SquareSpace(-1);
+                    bCount++;
+                }
                 else {
                     arr[i][j] = new SquareSpace(0);
 
@@ -49,6 +58,7 @@ public class ScreenEngine extends JFrame implements Runnable {
             }
         }
 
+        SquareSpace.bStart = bCount;
 
 
 
@@ -80,9 +90,16 @@ public class ScreenEngine extends JFrame implements Runnable {
 
 
     public void paint(Graphics g){
+        g.setColor(Color.black);
+        g.fillRect(0,  0,SIZE+dX+dX,SIZE+dY+dY);
         g.setColor(Color.WHITE);
         g.fillRect(dX, dY, SIZE, SIZE);
 
+
+        g.setColor(Color.black);
+        g.fillRect(dX+dX,  SIZE + dY + (dY/2),200,200);
+        g.setColor(Color.WHITE);
+        g.drawString("BOMBS: " + bCount,dX+dX,  SIZE + dY + (dY/2));
 
         for (int i = 0; i < SIZE/20; i++)
         {
@@ -107,8 +124,22 @@ public class ScreenEngine extends JFrame implements Runnable {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                if ( e.getButton() == MouseEvent.BUTTON1) reveal((e.getX() - dX) / 20, (e.getY() - dY) / 20);
-                else if (e.getButton() == MouseEvent.BUTTON3) arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].flag();
+                if ( e.getButton() == MouseEvent.BUTTON1){
+                    reveal((e.getX() - dX) / 20, (e.getY() - dY) / 20);
+                    if (SquareSpace.totalCount <= SquareSpace.bStart){
+                        repaint();
+                        JOptionPane.showMessageDialog(StartMain.s, "You win, resetting board.....","WINNER!", JOptionPane.PLAIN_MESSAGE);
+                        System.out.println("WIN");
+                        reset();
+                        repaint();
+                    }
+                }
+                else if (e.getButton() == MouseEvent.BUTTON3){
+                    arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].flag();
+                    if (arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].flagged) bCount--;
+                    else bCount++;
+                }
+
                 repaint();
 
             }
@@ -174,8 +205,12 @@ public class ScreenEngine extends JFrame implements Runnable {
 
 
     public void reveal(int x, int y){
-        arr[x][y].reveal();
+
+        if (!arr[x][y].isRevealed())arr[x][y].reveal();
         if (arr[x][y].getState() == -1){
+            repaint();
+
+            JOptionPane.showMessageDialog(this, "You lose, resetting board.....","GAME OVER", JOptionPane.PLAIN_MESSAGE);
             System.out.println("LOSE");
             reset();
             repaint();
@@ -189,7 +224,9 @@ public class ScreenEngine extends JFrame implements Runnable {
         {
             for (int j = -1; j < 2; j++)
             {
-                if (x + i < 20
+                if ((i != 0
+                        || j != 0)
+                        && x + i < 20
                         && x + i >= 0
                         && y + j < 20
                         && y + j >= 0

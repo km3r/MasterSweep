@@ -1,4 +1,5 @@
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,9 +15,12 @@ public class SquareSpace {
     boolean flagged;
     public boolean mouseOver;
     static Image[] imgs;
+    public static int totalCount;
+    public static int bStart;
 
     public void reveal()
     {
+        totalCount--;
         if (!flagged) revealed = true;
     }
 
@@ -41,6 +45,7 @@ public class SquareSpace {
     }
 
     static{
+        totalCount = 400;
         imgs = new Image[13];
         File f;
         for (int i = -1; i < 9;i++)

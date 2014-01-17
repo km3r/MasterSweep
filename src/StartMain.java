@@ -3,8 +3,9 @@
  * 1/15/14
  */
 public class StartMain {
+    public static ScreenEngine s;
     public static void main(String[] args) {
-        ScreenEngine s = new ScreenEngine();
+        s = new ScreenEngine();
         Thread t = new Thread(s);
         t.start();
     }
