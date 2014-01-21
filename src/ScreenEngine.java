@@ -207,13 +207,19 @@ public class ScreenEngine extends JFrame implements Runnable {
     public void reveal(int x, int y){
 
         if (!arr[x][y].isRevealed())arr[x][y].reveal();
-        if (arr[x][y].getState() == -1){
+        if (arr[x][y].getState() == -1 && !arr[x][y].flagged){
             repaint();
-
-            JOptionPane.showMessageDialog(this, "You lose, resetting board.....","GAME OVER", JOptionPane.PLAIN_MESSAGE);
-            System.out.println("LOSE");
-            reset();
-            repaint();
+            if (SquareSpace.totalCount >= 399)
+            {
+                reset();
+                reveal(x,y);
+                repaint();
+            } else {
+                JOptionPane.showMessageDialog(this, "You lose, resetting board.....","GAME OVER", JOptionPane.PLAIN_MESSAGE);
+                System.out.println("LOSE");
+                reset();
+                repaint();
+            }
             return;
         }
         if (arr[x][y].getState() != 0) return;

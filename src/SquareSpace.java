@@ -45,7 +45,7 @@ public class SquareSpace {
     }
 
     static{
-        totalCount = 400;
+        totalCount = 400 ;
         imgs = new Image[13];
         File f;
         for (int i = -1; i < 9;i++)
