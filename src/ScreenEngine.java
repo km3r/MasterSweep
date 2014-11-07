@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferStrategy;
 import java.io.File;
 import java.io.IOException;
 
@@ -23,12 +24,15 @@ public class ScreenEngine extends JFrame implements Runnable {
     ScreenEngine()
     {
 
+
         reset();
         setBackground(Color.BLACK);
         setSize(SIZE+ 2*dX, SIZE+ 2*dY);
         setTitle("MasterSweep");
         setResizable(false);
         setVisible(true);
+        createBufferStrategy(2);
+        paintNow();
     }
     public void reset(){
         SquareSpace.bStart = 0;
@@ -89,7 +93,8 @@ public class ScreenEngine extends JFrame implements Runnable {
     }
 
 
-    public void paint(Graphics g){
+    
+    public void paintNow(Graphics g){
         g.setColor(Color.black);
         g.fillRect(0,  0,SIZE+dX+dX,SIZE+dY+dY);
         g.setColor(Color.WHITE);
@@ -127,11 +132,11 @@ public class ScreenEngine extends JFrame implements Runnable {
                 if ( e.getButton() == MouseEvent.BUTTON1){
                     reveal((e.getX() - dX) / 20, (e.getY() - dY) / 20);
                     if (SquareSpace.totalCount <= SquareSpace.bStart){
-                        repaint();
+                        paintNow();
                         JOptionPane.showMessageDialog(StartMain.s, "You win, resetting board.....","WINNER!", JOptionPane.PLAIN_MESSAGE);
                         System.out.println("WIN");
                         reset();
-                        repaint();
+                        paintNow();
                     }
                 }
                 else if (e.getButton() == MouseEvent.BUTTON3){
@@ -140,7 +145,7 @@ public class ScreenEngine extends JFrame implements Runnable {
                     else if (!arr[(e.getX() - dX) / 20][(e.getY()-dY) / 20].isRevealed())bCount++;
                 }
 
-                repaint();
+                paintNow();
 
             }
 
@@ -192,7 +197,7 @@ public class ScreenEngine extends JFrame implements Runnable {
                     mouseY = e.getY();
 
                     arr[(mouseX - dX) / 20][(mouseY-dY) / 20].mouseOver = true;
-                    repaint();
+                    paintNow();
                 }**/
             }
         };
@@ -201,24 +206,34 @@ public class ScreenEngine extends JFrame implements Runnable {
       
     }
 
+    public void paintNow(){
+        BufferStrategy bs = getBufferStrategy();
 
+
+            Graphics g = bs.getDrawGraphics();
+            paintNow(g);
+            g.dispose();
+            bs.show();
+
+
+    }
 
 
     public void reveal(int x, int y){
 
         if (!arr[x][y].isRevealed())arr[x][y].reveal();
         if (arr[x][y].getState() == -1 && !arr[x][y].flagged){
-            repaint();
+            paintNow();
             if (SquareSpace.totalCount >= 399)
             {
                 reset();
                 reveal(x,y);
-                repaint();
+                paintNow();
             } else {
                 JOptionPane.showMessageDialog(this, "You lose, resetting board.....","GAME OVER", JOptionPane.PLAIN_MESSAGE);
                 System.out.println("LOSE");
                 reset();
-                repaint();
+                paintNow();
             }
             return;
         }
