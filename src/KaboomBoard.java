@@ -3,6 +3,7 @@ import javax.swing.event.TableModelListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import javax.swing.table.AbstractTableModel;
 
 /**
  * The logic of the board.
@@ -10,7 +11,7 @@ import java.util.*;
  * @author Kyle Rosenthal
  * @version 5/7/2015
  */
-public class KaboomBoard implements IBoard {
+public class KaboomBoard extends AbstractTableModel implements IBoard {
     private SquareSpace[][] board;
     private Integer[] oldBoard;
     private final static int SIZE = 10;
@@ -18,7 +19,6 @@ public class KaboomBoard implements IBoard {
     private int currBCount = 10;
     private static final int kbStart = 10;
     private boolean lost = false;
-    TableModelListener tListener;
 
     public KaboomBoard()
     {
@@ -68,6 +68,7 @@ public class KaboomBoard implements IBoard {
                 checkState(row,col);
             }
         }
+	fireTableDataChanged();
     }
 
     public void checkState(int xPos, int yPos)
@@ -91,16 +92,10 @@ public class KaboomBoard implements IBoard {
             if ( yPos+1 >= 0 && yPos+1 < SIZE && board[xPos+1][yPos+1].getState() == -1) count++;
         }
         board[xPos][yPos].setState(count);
-        changed();
+        
     }
 
-    private void changed()
-    {
-        if (tListener != null)
-        {
-            tListener.tableChanged(new TableModelEvent(this,0,SIZE));
-        }
-    }
+
 
     public void reveal(int xPos, int yPos){
 
@@ -108,7 +103,7 @@ public class KaboomBoard implements IBoard {
         {
             board[xPos][yPos].reveal();
         }
-        else if (board[xPos][yPos].getState() == -1 && !board[xPos][yPos].flagged)
+        if (board[xPos][yPos].getState() == -1 && !board[xPos][yPos].flagged)
         {
             lost = true;
         }
@@ -136,30 +131,30 @@ public class KaboomBoard implements IBoard {
             }
         }
     }
+    
     @Override
     public void makeMove(int xPos, int yPos)
     {
-        reveal(xPos, yPos);
-        changed();
+	reveal(xPos, yPos);
+	fireTableDataChanged();
     }
+
     @Override
     public void handleRightClick(int xPos, int yPos)
     {
-        System.out.print("test");
         board[xPos][yPos].flag();
-        changed();
+        fireTableDataChanged();
     }
+
     @Override
     public void newBoard()
     {
         reset();
-        changed();
     }
     @Override
     public void restart()
     {
         reset(oldBoard);
-        changed();
     }
     @Override
     public void clear()
@@ -168,13 +163,17 @@ public class KaboomBoard implements IBoard {
         {
             for (int col = 0; col < board[0].length; col ++)
             {
-                if (board[row][col].display().equals("0"))
+                if (!(board[row][col].getState() == -1))
                 {
                     board[row][col].reveal();
                 }
+		else if (!board[row][col].display().equals("F"))
+		{
+		    board[row][col].flag();
+		}
             }
         }
-        changed();
+        fireTableDataChanged();
     }
     @Override
     public void loadFile(String fileName)
@@ -254,17 +253,6 @@ public class KaboomBoard implements IBoard {
         else if (aValue instanceof SquareSpace)
         {
             board[rowIndex][columnIndex] = (SquareSpace) aValue;
-        }
-    }
-    @Override
-    public void addTableModelListener(TableModelListener listener) {
-        tListener = listener;
-    }
-    @Override
-    public void removeTableModelListener(TableModelListener listener) {
-        if (tListener == listener)
-        {
-            tListener  = null;
         }
     }
 }
