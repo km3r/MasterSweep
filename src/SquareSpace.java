@@ -1,22 +1,25 @@
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 /**
- * Kyle Rosenthal
- * 1/15/14
+ * Represents a single square on the board.
+ *
+ * @author Kyle Rosenthal
+ * @version 5/7/2015
  */
 public class SquareSpace {
     int state; // number of bombs next to, -1 if bomb
     boolean revealed;
     boolean flagged;
     public boolean mouseOver;
-    static Image[] imgs;
-    public static int totalCount;
+    public static int totalCount = 400;
     public static int bStart;
+    public static int flags;
+    private static String[] vals = {"X"," ","1","2","3","4","5","6","7","8","9","F"};
+
+    public SquareSpace(){
+        state = 0;
+        revealed = false;
+        flagged = false;
+        mouseOver = false;
+    }
 
     public void reveal()
     {
@@ -24,98 +27,56 @@ public class SquareSpace {
         if (!flagged) revealed = true;
     }
 
-    public void flag(){
-        if (!revealed) flagged = !flagged;
-    }
-    public void mouse()
+    public void flag()
     {
-        mouseOver = !mouseOver;
+        if (!revealed)
+        {
+            if (flagged)
+            {
+                flags--;
+            }
+            else
+            {
+                flags++;
+            }
+            flagged = !flagged;
+        }
     }
 
-    public int getState() {
+    public int getState()
+    {
         return state;
     }
 
-    public void setState(int state) {
-        if (state < 9 && state > - 2) this.state = state;
-    }
-
-    public boolean isRevealed() {
-        return revealed;
-    }
-
-    static{
-        totalCount = 400 ;
-        imgs = new Image[13];
-        File f;
-        for (int i = -1; i < 9;i++)
+    public String display()
+    {
+        String disp = "-";
+        if (flagged)
         {
-            f = new File("res/"+i+".png");
-
-            imgs[i+1] = null;
-            try {
-                imgs[i+1] = ImageIO.read(f);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            disp = vals[vals.length-1];
         }
-        try{
-            f = new File("res/A.png");
-            imgs[10] = ImageIO.read(f);
-            f = new File("res/B.png");
-            imgs[11] = ImageIO.read(f);
-            f = new File("res/F.png");
-            imgs[12] = ImageIO.read(f);
-        } catch (IOException e){
-            e.printStackTrace();
+        if (revealed)
+        {
+            disp = vals[state+1];
         }
+        return disp;
     }
 
-    SquareSpace(int state)
+    public void setState(int state)
     {
-        this.state = state;
-        revealed = false;
-        flagged = false;
-        mouseOver = false;
-
-
-    }
-    SquareSpace(){
-        state = 0;
-        revealed = false;
-        flagged = false;
-        mouseOver = false;
-    }
-
-
-    @Override
-    public String toString() {
-        switch (state){
-            case -1:
-                return "Bomb";
-            default:
-                return  ""+state;
+        if (state != 0 && this.state == 0)
+        {
+            totalCount--;
         }
+        if (state < 9 && state > - 2)
+        {
+            this.state = state;
+        }
+
     }
 
-    public Color toColor()
+    public boolean isRevealed()
     {
-        if (!revealed) return Color.DARK_GRAY;
-        switch (state){
-            case -1:
-                return Color.RED;
-            default:
-                return  Color.GRAY;
-        }
-    }
-
-    public Image toIcon()
-    {
-        if (flagged) return imgs[12];
-        else if (!revealed) {
-            if (mouseOver) return imgs[11];
-            else return imgs[10];
-        }
-        else return imgs[state+1];
+        return revealed;
     }
 }
